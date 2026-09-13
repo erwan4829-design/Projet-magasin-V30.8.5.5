@@ -91,53 +91,42 @@ function startCloudListeners() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  initFirebase();
-  if (currentUserEmail) {
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    // --- GESTION DES POINTS DE BASE (15 pts) ---
-function initUserPoints() {
-    if (currentUserEmail && dbState.users[currentUserEmail]) {
-        // Si l'utilisateur n'a pas encore de points initialisés
-        if (dbState.users[currentUserEmail].points === undefined) {
-            dbState.users[currentUserEmail].points = 15; // 15 points de base
-            localStorage.setItem('boutiquePointsUserData', JSON.stringify(dbState.users[currentUserEmail]));
-        }
-        // Mise à jour de l'affichage dans l'interface
-        const pointsElement = document.getElementById('pointsDisponibles'); // Adapte l'ID selon ton HTML
-        if (pointsElement) {
-            pointsElement.textContent = dbState.users[currentUserEmail].points + ' pts';
-        }
-    }
-}
-
-// --- GESTION DES CLICS SUR LE MENU DE NAVIGATION ---
-function initNavigation() {
-    // Sélectionne tous les boutons du menu (en haut)
-    const navButtons = document.querySelectorAll('header button, nav button, .nav-btn');
-    
-    navButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const targetName = button.textContent.trim();
-            console.log("Clic sur l'onglet :", targetName);
-            
-            // Ici tu peux ajouter la logique pour afficher/masquer les sections correspondantes
-            // Exemple : masquer toutes les sections et afficher celle qui correspond au bouton cliqué
-        });
-    });
-}
-
-// Mets à jour ton DOMContentLoaded existant pour lancer ces fonctions :
-window.addEventListener('DOMContentLoaded', () => {
     initFirebase();
-    if (currentUserEmail) {
-        document.getElementById('login').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-        
-        // Initialise les points et la navigation dès que l'app s'affiche
-        initUserPoints();
-        initNavigation();
+
+    // Simulation d'un utilisateur par défaut pour tester immédiatement si besoin
+    if (!currentUserEmail) {
+        currentUserEmail = "chef@ecole.fr";
     }
-});
-  }
+
+    if (!dbState.users[currentUserEmail]) {
+        dbState.users[currentUserEmail] = {
+            email: currentUserEmail,
+            points: 15,
+            pointsSpent: 0
+        };
+    } else if (dbState.users[currentUserEmail].points === undefined) {
+        dbState.users[currentUserEmail].points = 15;
+    }
+
+    // Sauvegarde et affichage direct
+    localStorage.setItem('boutiquePointsCurrentUserEmail', currentUserEmail);
+    localStorage.setItem('boutiquePointsUserData', JSON.stringify(dbState.users[currentUserEmail]));
+
+    // S'assure que l'application s'affiche bien
+    const loginEl = document.getElementById('login');
+    const appEl = document.getElementById('app');
+    if (loginEl) loginEl.classList.add('hidden');
+    if (appEl) appEl.classList.remove('hidden');
+
+    // Met à jour les points à l'écran
+    const pointsDispo = document.getElementById('pointsDisponibles');
+    if (pointsDispo) {
+        pointsDispo.textContent = dbState.users[currentUserEmail].points + ' pts';
+    }
+
+    // Rendre les boutons cliquables (correction d'éventuels conflits de clics)
+    document.querySelectorAll('button, a, .nav-btn').forEach(el => {
+        el.style.pointerEvents = 'auto';
+        el.style.cursor = 'pointer';
+    });
 });
